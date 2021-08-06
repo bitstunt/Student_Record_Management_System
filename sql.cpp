@@ -1,21 +1,60 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+#if defined(_WIN32) || defined(_WIN64)
+	string clear = "cls";
+#elif __linux__
+	string clear = "clear";
+#endif
+
 class sql
 {
-public:
-	sql() { system("cls"); }
-	void create_file(int &, string &, string &, vector<string> &, string &);
-	void add_instructor(int &);
-	bool check_id(int &);
-	bool check_id_password(int &, string &, string &);
-	vector<string> get_courses(int &);
-	void add_student();
-	int create_student_record(int &, string &, string &, string &, vector<int> &);
-	vector<string> get_student_record(int &);
-	vector<string> get_instructor(int &);
-	~sql() {}
+	public:
+		sql() {system(clear.c_str()); }
+		void create_file(int &, string &);
+		bool check_id(int &);
+		bool check_id_password(int &, string &, string &);
+		vector<string> get_courses(int &);
+		void update_student(int &, string &);
+		int create_student_record(int &, string &);
+		vector<string> get_student_record(int &);
+		vector<string> get_instructor(int &);
+		~sql() {}
 };
+
+void sql::update_student(int &id, string &details)
+{
+	int file_code = (id / 10000) + 100;
+	string file_name = to_string(file_code) + ".csv";
+	fstream file(file_name, std::fstream::in);
+	fstream temp("temp.csv", std::fstream::out);
+	string line;
+	int location = (id % 10000) + 1;
+	int line_number = 0;
+	while(!file.eof())	
+	{
+		line_number++;
+		if (line_number == location)
+		{
+			getline(file, line);
+			temp << details << "\n";
+		}
+		else
+		{
+			getline(file, line);
+			if( line == "");
+			else
+			{
+				temp << line << "\n";
+			}
+		}
+	}
+	temp.close();
+	file.close();
+	string command = "mv temp.csv " + file_name;
+	system(command.c_str());
+}
+
 
 bool sql::check_id_password(int &id, string &password, string &type)
 {
@@ -91,51 +130,13 @@ vector<string> sql::get_student_record(int &id)
 	return details;
 }
 
-void sql::create_file(int &number, string &fname, string &lname, vector<string> &courses, string &password)
+void sql::create_file(int &number, string &details)
 {
 	int file_code = 100 + number;
 	string file_name = to_string(file_code) + ".csv";
 	fstream file(file_name, std::fstream::out);
-	file << setw(5) << file_code << "," << password << "," << fname << "," << lname << ",";
-	for (int i = 0; i < 5; i++)
-	{
-		file << courses.at(i) << ",";
-	}
+	file << details;
 	file.close();
-}
-
-void sql::add_instructor(int &number)
-{
-	string First_name, Last_name, password;
-	vector<string> courses(5, "NULL");
-	cout << "Enter first name of the instructor: ";
-	getline(cin, First_name);
-	cout << "\nEnter last name of the instructor: ";
-	getline(cin, Last_name);
-	for (int i = 0; i < 5; i++)
-	{
-		cout << "\n Enter " << i + 1;
-		switch (i)
-		{
-		case 0:
-			cout << "st course under the instructor: ";
-			break;
-		case 1:
-			cout << "nd course under the instructor: ";
-			break;
-		case 2:
-			cout << "rd course under the instructor: ";
-			break;
-		default:
-			cout << "th course under the instructor: ";
-			break;
-		}
-		string course;
-		getline(cin, courses.at(i));
-	}
-	cout << "\nCreate password: ";
-	getline(cin, password);
-	create_file(number, First_name, Last_name, courses, password);
 }
 
 bool sql::check_id(int &id)
@@ -159,30 +160,19 @@ vector<string> sql::get_courses(int &id)
 	string course;
 	for (int i = 0; i < 9; i++)
 	{
-		switch (i)
+		if (i > 3)
 		{
-		case 0:
-			getline(file, course, ',');
-			break;
-		case 1:
-			getline(file, course, ',');
-			break;
-		case 2:
-			getline(file, course, ',');
-			break;
-		case 3:
-			getline(file, course, ',');
-			break;
-		default:
 			getline(file, course, ',');
 			courses.push_back(course);
-			break;
 		}
+		else
+			getline(file, course, ',');
+
 	}
 	return courses;
 }
 
-int sql::create_student_record(int &id, string &password, string &fname, string &lname, vector<int> &marks)
+int sql::create_student_record(int &id, string &details)
 {
 	string file_name = to_string(id) + ".csv";
 	fstream file(file_name, std::fstream::in);
@@ -196,68 +186,19 @@ int sql::create_student_record(int &id, string &password, string &fname, string 
 	file.close();
 	student_id = (id - 100) * 10000 + student_id;
 	file.open(file_name, std::fstream::app);
-	file << "\n"
-		 << student_id << "," << password << "," << fname << "," << lname << ",";
-	for (int i = 0; i < 5; i++)
-	{
-		file << marks.at(i) << ",";
-	}
+	file << "\n" << details;
 	file.close();
 	return student_id;
 }
 
-void sql::add_student()
-{
-	int id;
-	string fname, lname, password;
-	vector<int> marks(5, 0);
-	cout << "Enter instructor's id of the student: ";
-	cin >> id;
-	if (check_id(id))
-	{
-		cout << "\nEnter first name of student: ";
-		cin >> fname;
-		cout << "\nEnter last name of student: ";
-		cin >> lname;
-		vector<string> courses = get_courses(id);
-		for (int i = 0; i < 5; i++)
-		{
-			cout << "\n Enter marks obtained in " << courses.at(i) << ": ";
-			int mark;
-			cin >> marks.at(i);
-		}
-		cout << "\nCreate password for student: ";
-		cin >> password;
-		int student_id = create_student_record(id, password, fname, lname, marks);
-		system("cls");
-		cout << "\nStudent Id is : " << student_id << "\n\n";
-		cout << "Password is : " << password << "\n\n";
-	}
-	else
-	{
-		cout << "Instructor not available! \n";
-	}
-	system("pause");
-}
-
 int main()
 {
+
 	cout << "Hello";
 	sql test;
 	int x = 10001, y = 1;
-	string password = "123-345", type = "student";
-	test.add_student();
-	bool result = test.check_id_password(x, password, type);
-	cout << result << "\n";
-	result = true;
-	cout << result << "\n";
-	/*test.add_instructor(x);
-	test.add_student();
-	fstream file("101.csv", std::fstream::in | std::fstream::app );
-	string line;
-	getline(file, line);
-	cout << line.length();
-	file << "\nHi";*/
+	string details = "10001,123-5555456,Mukta,Kumari,100,100,100,100,100,";
+	test.update_student(x, details);
 
 	return 0;
 }
