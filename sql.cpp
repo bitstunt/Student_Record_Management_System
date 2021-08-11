@@ -2,24 +2,26 @@
 using namespace std;
 
 #if defined(_WIN32) || defined(_WIN64)
-	string clear = "cls";
+string clear = "cls";
+string command = "move /Y temp.csv ";
 #elif __linux__
-	string clear = "clear";
+string clear = "clear";
+string command = "mv temp.csv ";
 #endif
 
 class sql
 {
-	public:
-		sql() {system(clear.c_str()); }
-		void create_file(int &, string &);
-		bool check_id(int &);
-		bool check_id_password(int &, string &, string &);
-		vector<string> get_courses(int &);
-		void update_student(int &, string &);
-		int create_student_record(int &, string &);
-		vector<string> get_student_record(int &);
-		vector<string> get_instructor(int &);
-		~sql() {}
+public:
+	sql() { system(clear.c_str()); }
+	void create_file(int &, string &);
+	bool check_id(int &);
+	bool check_id_password(int &, string &, string &);
+	vector<string> get_courses(int &);
+	void update_student(int &, string &);
+	int create_student_record(int &, string &);
+	vector<string> get_student_record(int &);
+	vector<string> get_instructor(int &);
+	~sql() {}
 };
 
 void sql::update_student(int &id, string &details)
@@ -31,7 +33,7 @@ void sql::update_student(int &id, string &details)
 	string line;
 	int location = (id % 10000) + 1;
 	int line_number = 0;
-	while(!file.eof())	
+	while (!file.eof())
 	{
 		line_number++;
 		if (line_number == location)
@@ -42,7 +44,8 @@ void sql::update_student(int &id, string &details)
 		else
 		{
 			getline(file, line);
-			if( line == "");
+			if (line == "")
+				;
 			else
 			{
 				temp << line << "\n";
@@ -51,10 +54,9 @@ void sql::update_student(int &id, string &details)
 	}
 	temp.close();
 	file.close();
-	string command = "mv temp.csv " + file_name;
+	command += file_name;
 	system(command.c_str());
 }
-
 
 bool sql::check_id_password(int &id, string &password, string &type)
 {
@@ -137,6 +139,9 @@ void sql::create_file(int &number, string &details)
 	fstream file(file_name, std::fstream::out);
 	file << details;
 	file.close();
+	fstream admin("admin.csv", std::fstream::out);
+	admin << (number + 1);
+	admin.close();
 }
 
 bool sql::check_id(int &id)
@@ -167,7 +172,6 @@ vector<string> sql::get_courses(int &id)
 		}
 		else
 			getline(file, course, ',');
-
 	}
 	return courses;
 }
@@ -186,7 +190,8 @@ int sql::create_student_record(int &id, string &details)
 	file.close();
 	student_id = (id - 100) * 10000 + student_id;
 	file.open(file_name, std::fstream::app);
-	file << "\n" << details;
+	file << "\n"
+		 << details;
 	file.close();
 	return student_id;
 }
@@ -197,8 +202,8 @@ int main()
 	cout << "Hello";
 	sql test;
 	int x = 10001, y = 1;
-	string details = "10001,123-5555456,Mukta,Kumari,100,100,100,100,100,";
-	test.update_student(x, details);
+	string details = "10001,123-456,Mukta,Kumari,100,100,100,100,100,";
+	test.create_file(y, details);
 
 	return 0;
 }
