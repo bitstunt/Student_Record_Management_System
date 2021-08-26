@@ -2,11 +2,11 @@
 using namespace std;
 
 #if defined(_WIN32) || defined(_WIN64)
-string clear = "cls";
-string command = "move /Y temp.csv ";
+static string clear = "cls";
+static string command = "move /Y temp.csv ";
 #elif __linux__
-string clear = "clear";
-string command = "mv temp.csv ";
+static string clear = "clear";
+static string command = "mv temp.csv ";
 #endif
 
 class sql
@@ -31,9 +31,10 @@ public:
 	void home();
 	void student();
 	void instructor();
+	void instructor(int &, string &);
 	void admin();
 	void display_record(string &, int &);
-	void update_record(){};
+	void update_record(string &);
 	void insert_record(string &, int &);
 };
 
@@ -52,23 +53,25 @@ void sql::update_student(int &id, string &details)
 		if (line_number == location)
 		{
 			getline(file, line);
-			temp << details << "\n";
+			temp << "\n"
+				 << details;
 		}
 		else
 		{
 			getline(file, line);
 			if (line == "")
 				;
+			else if (line_number == 1)
+				temp << line;
 			else
-			{
-				temp << line << "\n";
-			}
+				temp << "\n"
+					 << line;
 		}
 	}
 	temp.close();
 	file.close();
-	command += file_name;
-	system(command.c_str());
+	string move = command + file_name;
+	system(move.c_str());
 }
 
 bool sql::check_id_password(int &id, string &password, string &type)
@@ -266,33 +269,47 @@ void terminal::instructor()
 	getline(cin, password);
 	bool verify = check_id_password(id, password, type);
 	if (verify == false)
-		cout << "\nIncorrect ID or password\n";
-	else
 	{
-		system(clear.c_str());
-		cout << "1. Add Student Record\n\n2. Get Student Records\n\n Enter an option number[example: 1]: ";
-		int option;
-		cin >> option;
-		switch (option)
-		{
-		case 1:
-			type = "student";
-			system(clear.c_str());
-			insert_record(type, id);
-			break;
-		case 2:
-			type = "instructor";
-			system(clear.c_str());
-			display_record(type, id);
-			break;
-		default:
-			break;
-		}
+		cout << "\nIncorrect ID or password\n";
+		int pause_key = getchar();
+		home();
 	}
+	else
+		instructor(id, type);
+}
+
+void terminal::instructor(int &id, string &type)
+{
+	system(clear.c_str());
+	cout << "1. Add Student Record\n\n2. Get Student Records\n\n3. Update Student Records\n\n4. Home\n\nEnter an option number[example: 1]: ";
+	int option;
+	cin >> option;
 	cin.ignore();
+	switch (option)
+	{
+	case 1:
+		type = "student";
+		system(clear.c_str());
+		insert_record(type, id);
+		break;
+	case 3:
+		type = "student";
+		system(clear.c_str());
+		update_record(type);
+		break;
+	case 2:
+		type = "instructor";
+		system(clear.c_str());
+		display_record(type, id);
+		break;
+	default:
+		system(clear.c_str());
+		home();
+		break;
+	}
 	int pause_key = getchar();
 	system(clear.c_str());
-	home();
+	instructor(id, type);
 }
 
 void terminal::admin()
@@ -349,13 +366,14 @@ void terminal::display_record(string &type, int &id)
 		{
 			cout << "\t" << instructor_details[i + 4] << " |\t";
 		}
-		string dashes(120,'-');
-		cout << "\n" << dashes;
+		string dashes(120, '-');
+		cout << "\n"
+			 << dashes;
 		id = (id - 100) * 10000 + 1;
 		vector<string> student_details = get_student_record(id);
 		while (true)
 		{
-			if (student_details[0] == "NULL")
+			if (student_details[0] == "NULL" | student_details[0] == "")
 				break;
 			else
 			{
@@ -377,7 +395,6 @@ void terminal::insert_record(string &type, int &id)
 {
 	if (type == "student")
 	{
-		cin.ignore();
 		string details, input;
 		vector<string> courses = get_courses(id);
 		cout << "\nEnter login password for student: ";
@@ -430,6 +447,44 @@ void terminal::insert_record(string &type, int &id)
 		}
 		create_file(id, details);
 		cout << "\nInstructor Id is: " << 100 + id << "\n";
+	}
+}
+
+void terminal::update_record(string &type)
+{
+	if (type == "student")
+	{
+		cout << "Enter ID of the student: ";
+		int id;
+		cin >> id;
+		cin.ignore();
+		string details = to_string(id), input;
+		details.append(",");
+		int courses_id = (id / 10000) + 100;
+		vector<string> courses = get_courses(courses_id);
+		system(clear.c_str());
+		cout << "Enter login password for student: ";
+		getline(cin, input);
+		details += input;
+		details.append(",");
+		cout << "\nEnter first name of student: ";
+		getline(cin, input);
+		details += input;
+		details.append(",");
+		cout << "\nEnter last name of student: ";
+		getline(cin, input);
+		details += input;
+		details.append(",");
+		for (int i = 0; i < courses.size(); i++)
+		{
+			cout << "\nEnter marks obtained in " << courses[i] << ": ";
+			getline(cin, input);
+			details += input;
+			details.append(",");
+		}
+		update_student(id, details);
+		system(clear.c_str());
+		display_record(type, id);
 	}
 }
 
