@@ -272,6 +272,7 @@ void terminal::instructor()
 	{
 		cout << "\nIncorrect ID or password\n";
 		int pause_key = getchar();
+		system(clear.c_str());
 		home();
 	}
 	else
