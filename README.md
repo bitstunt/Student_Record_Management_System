@@ -20,6 +20,6 @@ It has four options: <br />
 2. Get Student Records <br />
 3. Update Student Records <br />
 4. Home <br />
-_Precautions:_ Please, select option two only once per login as any number of selection of the option would lead to NULL output.
+_Precautions:_ Please, select option two only once per login as any number of selection of the option other than one would lead to NULL output.
 ### Student Login:
 It just displays student's record.
