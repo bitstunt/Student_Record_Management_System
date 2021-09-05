@@ -11,31 +11,31 @@ static string command = "mv temp.csv ";
 
 class sql
 {
-public:
-	sql() { system(clear.c_str()); }
-	void create_file(int &, string &);
-	bool check_id(int &);
-	bool check_id_password(int &, string &, string &);
-	vector<string> get_courses(int &);
-	void update_student(int &, string &);
-	int create_student_record(int &, string &);
-	vector<string> get_student_record(int &);
-	vector<string> get_instructor(int &);
-	~sql() {}
+	public:
+		sql() { system(clear.c_str()); }
+		void create_file(int &, string &);
+		bool check_id(int &);
+		bool check_id_password(int &, string &, string &);
+		vector<string> get_courses(int &);
+		void update_student(int &, string &);
+		int create_student_record(int &, string &);
+		vector<string> get_student_record(int &);
+		vector<string> get_instructor(int &);
+		~sql() {}
 };
 
 class terminal : public sql
 {
-public:
-	terminal() { home(); }
-	void home();
-	void student();
-	void instructor();
-	void instructor(int &, string &);
-	void admin();
-	void display_record(string &, int &);
-	void update_record(string &);
-	void insert_record(string &, int &);
+	public:
+		terminal() { home(); }
+		void home();
+		void student();
+		void instructor();
+		void instructor(int &, string &);
+		void admin();
+		void display_record(string &, int &);
+		void update_record(string &);
+		void insert_record(string &, int &);
 };
 
 void sql::update_student(int &id, string &details)
@@ -52,9 +52,17 @@ void sql::update_student(int &id, string &details)
 		line_number++;
 		if (line_number == location)
 		{
-			getline(file, line);
-			temp << "\n"
-				 << details;
+			if (line_number == 1)
+			{
+				getline(file, line);
+				temp << details;
+			}
+			else
+			{
+				getline(file, line);
+				temp << "\n"
+					<< details;
+			}
 		}
 		else
 		{
@@ -65,7 +73,7 @@ void sql::update_student(int &id, string &details)
 				temp << line;
 			else
 				temp << "\n"
-					 << line;
+					<< line;
 		}
 	}
 	temp.close();
@@ -207,8 +215,8 @@ int sql::create_student_record(int &id, string &details)
 	student_id = (id - 100) * 10000 + student_id;
 	file.open(file_name, std::fstream::app);
 	file << "\n"
-		 << student_id << ","
-		 << details;
+		<< student_id << ","
+		<< details;
 	file.close();
 	return student_id;
 }
@@ -221,18 +229,18 @@ void terminal::home()
 	cin >> option;
 	switch (option)
 	{
-	case 2:
-		system(clear.c_str());
-		instructor();
-		break;
-	case 3:
-		system(clear.c_str());
-		admin();
-		break;
-	default:
-		system(clear.c_str());
-		student();
-		break;
+		case 2:
+			system(clear.c_str());
+			instructor();
+			break;
+		case 3:
+			system(clear.c_str());
+			admin();
+			break;
+		default:
+			system(clear.c_str());
+			student();
+			break;
 	}
 }
 
@@ -288,25 +296,25 @@ void terminal::instructor(int &id, string &type)
 	cin.ignore();
 	switch (option)
 	{
-	case 1:
-		type = "student";
-		system(clear.c_str());
-		insert_record(type, id);
-		break;
-	case 3:
-		type = "student";
-		system(clear.c_str());
-		update_record(type);
-		break;
-	case 2:
-		type = "instructor";
-		system(clear.c_str());
-		display_record(type, id);
-		break;
-	default:
-		system(clear.c_str());
-		home();
-		break;
+		case 1:
+			type = "student";
+			system(clear.c_str());
+			insert_record(type, id);
+			break;
+		case 3:
+			type = "student";
+			system(clear.c_str());
+			update_record(type);
+			break;
+		case 2:
+			type = "instructor";
+			system(clear.c_str());
+			display_record(type, id);
+			break;
+		default:
+			system(clear.c_str());
+			home();
+			break;
 	}
 	int pause_key = getchar();
 	system(clear.c_str());
@@ -369,9 +377,9 @@ void terminal::display_record(string &type, int &id)
 		}
 		string dashes(120, '-');
 		cout << "\n"
-			 << dashes;
-		id = (id - 100) * 10000 + 1;
-		vector<string> student_details = get_student_record(id);
+			<< dashes;
+		int student_id = (id - 100) * 10000 + 1;
+		vector<string> student_details = get_student_record(student_id);
 		while (true)
 		{
 			if (student_details[0] == "NULL" | student_details[0] == "")
@@ -385,8 +393,8 @@ void terminal::display_record(string &type, int &id)
 				{
 					cout << "\t" << setw(instructor_details[i + 4].length()) << student_details[i + 4] << " |\t";
 				}
-				id++;
-				student_details = get_student_record(id);
+				student_id++;
+				student_details = get_student_record(student_id);
 			}
 		}
 	}
@@ -426,6 +434,7 @@ void terminal::insert_record(string &type, int &id)
 	{
 		cin.ignore();
 		string details = to_string(id), input;
+		int update_id = id * 10000;
 		details.append(",");
 		cout << "Enter login password for instructor: ";
 		getline(cin, input);
@@ -446,7 +455,7 @@ void terminal::insert_record(string &type, int &id)
 			details += input;
 			details.append(",");
 		}
-		create_file(id, details);
+		update_student(update_id, details);
 		cout << "\nInstructor Id is: " << 100 + id << "\n";
 	}
 }
