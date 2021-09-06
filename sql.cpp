@@ -327,13 +327,13 @@ void terminal::admin()
 	int input;
 	cin >> input;
 	system(clear.c_str());
-	string type = "instructor";
 	if (input == 1)
 	{
 		fstream file("admin.csv", std::fstream::in);
 		int id;
 		file >> id;
 		file.close();
+		string type = "instructor_add";
 		insert_record(type, id);
 	}
 	else if (input == 2)
@@ -342,6 +342,7 @@ void terminal::admin()
 		int id;
 		cin >> id;
 		id -= 100;
+		string type = "instructor_update";
 		insert_record(type, id);
 	}
 	int pause_key = getchar();
@@ -430,13 +431,41 @@ void terminal::insert_record(string &type, int &id)
 		cout << "Student Id is: " << generate_id << "\n";
 		display_record(type, generate_id);
 	}
-	else if (type == "instructor")
+	else if (type == "instructor_add")
+	{
+		cin.ignore();
+		string details = to_string(id), input;
+		details.append(",");
+		cout << "\nEnter login password for instructor: ";
+		getline(cin, input);
+		details += input;
+		details.append(",");
+		cout << "\nEnter first name of instructor: ";
+		getline(cin, input);
+		details += input;
+		details.append(",");
+		cout << "\nEnter last name of instructor: ";
+		getline(cin, input);
+		details += input;
+		details.append(",");
+		for (int i = 0; i < 5; i++)
+		{
+			cout << "\nName of Subject " << i + 1 << ": ";
+			getline(cin, input);
+			details += input;
+			details.append(",");
+		}
+		create_file(id, details);
+		cout << "\nInstructor Id is: " << 100 + id << "\n";
+
+	}
+	else if (type == "instructor_update")
 	{
 		cin.ignore();
 		string details = to_string(id), input;
 		int update_id = id * 10000;
 		details.append(",");
-		cout << "Enter login password for instructor: ";
+		cout << "\nEnter login password for instructor: ";
 		getline(cin, input);
 		details += input;
 		details.append(",");
