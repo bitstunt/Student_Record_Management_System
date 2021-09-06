@@ -12,14 +12,13 @@ Student and Instructor Login requires password and id generated at the time of c
 All records are stored in seperate _.csv_  files for each instructor. The _.csv_  files can be converted in excel sheets and columns' name can be further modified to represent some meaningful data.
 ### Admin Login:
 It has two options: <br />
-1. Update Instructor: _It will delete all the records under the specified instructor and just add the new instructor with recently provided details. It is the worst thing to be selected unless you want a new instructor with the existing id._ <br />
-2. Add Instructor: _Name is enough to explain its functions._ <br />
+1. Update Instructor: <br />
+2. Add Instructor: <br />
 ### Instructor Login:
 It has four options: <br />
 1. Add Student Records <br />
 2. Get Student Records <br />
 3. Update Student Records <br />
 4. Home <br />
-_Precautions:_ Please, select option two only once per login as any number of selection of the option other than one would lead to NULL output.
 ### Student Login:
 It just displays student's record.
